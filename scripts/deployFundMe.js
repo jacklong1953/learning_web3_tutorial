@@ -62,7 +62,7 @@ async function main() {
         console.log("verification skipped")
     }
 
-    return;
+    // return;
 
     const [firstAccount, secondAccount] = await ethers.getSigners()
     const fundTxWithAccount1 = await fundMe.fund({ value: ethers.parseEther("0.05") })

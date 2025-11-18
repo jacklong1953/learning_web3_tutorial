@@ -4,6 +4,7 @@ require("@chainlink/env-enc").config();
 // require("./tasks/deploy-fundMe"); // 引入自定义任务
 // require(".tasks/interact-fundMe");
 require("./tasks")
+require("hardhat-deploy")
 
 // 如果设置了 HTTP_PROXY, 配置全局代理
 // if (process.env.HTTP_PROXY) {
