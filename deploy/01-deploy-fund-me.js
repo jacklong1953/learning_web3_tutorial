@@ -11,7 +11,15 @@
 // }
 
 module.exports = async ({ getNamedAccounts, deployments }) => {
-    const firstAccount = (await getNamedAccounts()).firstAccount
-    console.log("First account is ", firstAccount)
+    const { firstAccount } = (await getNamedAccounts())
+    const { deploy } = deployments
+
+    await deploy("FundMe", {
+        from : firstAccount,
+        args : [180],
+        log : true
+    })
     console.log("Deploying FundMe...")
 }
+
+module.exports.tags = ["all", "fundme"]
