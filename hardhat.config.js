@@ -32,5 +32,13 @@ module.exports = {
   },
   sourcify: {
     enabled: true
+  },
+  namedAccounts: {
+    firstAccount: {
+      default: 0
+    },
+    secondAccount: {
+      default: 1
+    }
   }
 };
