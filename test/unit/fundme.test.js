@@ -1,7 +1,9 @@
 const { ethers, deployments } = require("hardhat")
 const { assert, expect } = require("chai")
 const helpers = require("@nomicfoundation/hardhat-network-helpers");
+const { developmentChains } = require("../../helper-hardhat-config")
 
+!developmentChains.includes(network.name) ? describe.skip :
 describe("test fundme contract", async function () {
     // 定义全局变量
     let fundMe
