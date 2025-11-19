@@ -18,18 +18,22 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deploy } = deployments
 
     let dataFeedAddr
+    let confirmations
     if (developmentChains.includes(network.name)) {
         dataFeedAddr = (await deployments.get("MockV3Aggregator")).address
+        confirmations = 0
     } else {
         dataFeedAddr = networkConfig[network.config.chainId].ethUsdDataFeed
+        confirmations = CONFIRMATIONS
     }
 
     const fundMe = await deploy("FundMe", {
         from: firstAccount,
         args: [LOCK_TIME, dataFeedAddr],
         log: true,
-        waitConfirmations: CONFIRMATIONS
+        waitConfirmations: confirmations
     })
+    // remove deployments directory or add --reset flag if you redeploy contract
 
     // Verify the contract
     if (hre.network.config.chainId === 11155111 && process.env.ETHERSCAN_API_KEY) {

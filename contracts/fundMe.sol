@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
-
+// import "hardhat/console.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
 // 1. 创建一个收款函数
@@ -21,6 +21,9 @@ contract FundMe {
 
     bool public getFundSuccess = false;
 
+    event fundWithdrawByOwner(uint256);
+    event refundByOwner(address, uint256);
+
     constructor(uint256 _lockTime, address dataFeedAddr) {
         // sepolia testnet, data feed address: eth/usd
         // dataFeed = AggregatorV3Interface(0x694AA1769357215DE4FAC081bf1f309aDC325306);
@@ -32,7 +35,9 @@ contract FundMe {
 
     function fund() external payable {
         require(convertEthToUsd(msg.value) >= MININUM_VALUE, "Send more eth...");
-        require(block.timestamp > deploymentTimeStamp + lockTime, "Window is closed.");
+        // console.log("lockTime:", lockTime + deploymentTimeStamp);
+        // console.log("block.timestamp:", block.timestamp);
+        require(block.timestamp < deploymentTimeStamp + lockTime, "Window is closed.");
         fundersToAmount[msg.sender] += msg.value;
     }
 
@@ -75,20 +80,25 @@ contract FundMe {
         // require(success, "Failed to send fund");
 
         // call: transfer ETH with data return bool and value of function
-        (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
+        uint256 balance = address(this).balance;
+        (bool success, ) = payable(msg.sender).call{value: balance}("");
         require(success, "Tx failed.");
         getFundSuccess = true;
+
+        emit fundWithdrawByOwner(balance);
     }
 
     function refund() external windowClosed {
+        uint256 balance = fundersToAmount[msg.sender];
         require(address(this).balance < TARGET, "Target is reached.");
-        require(fundersToAmount[msg.sender] != 0, "There is no fund for you.");
-        (bool success, ) = payable(msg.sender).call{value: fundersToAmount[msg.sender]}("");
+        require(balance != 0, "There is no fund for you.");
+        (bool success, ) = payable(msg.sender).call{value: balance}("");
         require(success, "Refund is failed.");
+        emit refundByOwner(msg.sender, balance);
     }
 
     modifier windowClosed() {
-        require(block.timestamp >= deploymentTimeStamp + lockTime, "Window is closed.");
+        require(block.timestamp >= deploymentTimeStamp + lockTime, "Window is not closed.");
         _;
     }
 
